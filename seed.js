@@ -1,15 +1,13 @@
 // seed.js
 const mongoose = require('mongoose');
-const Product = require('./models/Product'); // Garanta que o modelo existe
+const dotenv = require('dotenv');
+const Product = require('./models/Product');
 
-mongoose.connect('mongodb://127.0.0.1:27017/a_riachense')
-  .then(() => {
-    console.log('✅ Conectado ao MongoDB!');
-    // aqui roda seu seed
-  })
-  .catch((error) => {
-    console.error('❌ Erro ao conectar ao MongoDB', error);
-  });
+dotenv.config();
+
+// Use a variável de ambiente ou fallback para localhost
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/a_riachense';
+
 const products = [
   { name: "Marlboro XXL 27", description: "Pack XXL 27 cigarros", price: 7.0, img: "img/bolo-arroz.png" },
   { name: "Pão Alentejano", description: "Pão tradicional alentejano", price: 2.0, img: "img/pao-alentejano.png" },
@@ -18,15 +16,20 @@ const products = [
 
 async function seedDatabase() {
   try {
+    await mongoose.connect(MONGO_URL);
+    console.log('✅ Conectado ao MongoDB!');
+
     await Product.deleteMany({});
     await Product.insertMany(products);
     console.log("✅ Produtos inseridos com sucesso!");
-    process.exit();
   } catch (error) {
-    console.error(error);
-    process.exit(1);
+    console.error('❌ Erro ao inserir produtos:', error);
+  } finally {
+    await mongoose.disconnect();
+    process.exit();
   }
 }
 
+// Executa
 seedDatabase();
 
