@@ -17,9 +17,17 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexão com MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/a_riachense')
-  .then(() => console.log('✅ Conectado ao MongoDB!'))
-  .catch((err) => console.error('❌ Erro ao conectar ao MongoDB', err));
+const mongoose = require('mongoose');
+const uri = process.env.MONGO_URL || 'mongodb+srv://user:pass@clusterurl/...';
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log('✅ Conectado ao MongoDB Atlas!');
+}).catch((err) => {
+  console.error('❌ Erro ao conectar ao MongoDB', err);
+});
+
 
 
 // Edita produto
