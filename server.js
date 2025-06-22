@@ -1,50 +1,78 @@
-// Importa as dependências
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const path = require('path');
+const dotenv = require('dotenv');
 
-// Inicializa o app
+dotenv.config();
+
+const Product = require('./models/Product');
+const Order = require('./models/Order');
+
 const app = express();
-const PORT = 3000;
 
+// Middlewares
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(express.static('public'));
+// Conexão com MongoDB
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ Conectado ao MongoDB!'))
+.catch(err => {
+  console.error('❌ Erro ao conectar ao MongoDB', err);
+  process.exit(1);
+});
 
-// Simula base de dados
-let products = [
-  { id: 1, category: 'Tabaco', name: 'Cigarros XXX', price: 5.5, description: 'Descrição do produto' },
-  { id: 2, category: 'Papelaria', name: 'Caderno A4', price: 2.0, description: 'Descrição do produto' },
-  { id: 3, category: 'Jornais', name: 'Último Jornal', price: 1.5, description: 'Descrição do produto' }
-];
-let orders = [];
+// Edita produto
+app.put("/api/products/:id", async (req, res) => {
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedProduct) return res.status(404).send({ error: "Produto não encontrado" });
+    res.send(updatedProduct);
+  } catch (error) {
+    res.status(500).send({ error: "Erro ao editar produto" });
+  }
+});
 
-// Rota para obter todos os produtos
-app.get('/api/products', (req, res) => {
+// Deleta produto
+app.delete("/api/products/:id", async (req, res) => {
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    if (!deletedProduct) return res.status(404).send({ error: "Produto não encontrado" });
+    res.send({ message: "Produto apagado com sucesso" });
+  } catch (error) {
+    res.status(500).send({ error: "Erro ao apagar produto" });
+  }
+});
+
+// Rotas para Produtos
+app.get('/api/products', async (req, res) => {
+  const products = await Product.find();
   res.json(products);
 });
 
-// Rota para finalizar pedido
-app.post('/api/orders', (req, res) => {
-  const { customer, items } = req.body;
-
-  if (!customer || !items || !items.length) {
-    return res.status(400).send({ error: 'Pedido inválido' });
+// Rotas para Pedidos
+app.post('/api/orders', async (req, res) => {
+  try {
+    const order = new Order(req.body);
+    await order.save();
+    res.json({ message: '✅ Pedido salvo com sucesso!', orderId: order._id });
+  } catch (error) {
+    res.status(500).json({ error: '❌ Erro ao salvar o pedido.' });
   }
-
-  const order = {
-    id: orders.length + 1,
-    customer,
-    items,
-    date: new Date()
-  };
-  orders.push(order);
-
-  res.json({ success: true, orderId: order.id });
 });
 
-// Inicia o servidor
+// Página inicial
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+// Porta
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });
