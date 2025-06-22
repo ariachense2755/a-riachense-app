@@ -17,15 +17,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexão com MongoDB
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ Conectado ao MongoDB!'))
-.catch(err => {
-  console.error('❌ Erro ao conectar ao MongoDB', err);
-  process.exit(1);
-});
+mongoose.connect('mongodb://127.0.0.1:27017/a_riachense')
+  .then(() => console.log('✅ Conectado ao MongoDB!'))
+  .catch((err) => console.error('❌ Erro ao conectar ao MongoDB', err));
+
 
 // Edita produto
 app.put("/api/products/:id", async (req, res) => {
