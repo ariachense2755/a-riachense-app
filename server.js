@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // 👈 Já declarado aqui
 const path = require('path');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
+// Modelos
 const Product = require('./models/Product');
 const Order = require('./models/Order');
 
@@ -17,18 +18,18 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexão com MongoDB
-const mongoose = require('mongoose');
-const uri = process.env.MONGO_URL || 'mongodb+srv://user:pass@clusterurl/...';
+const uri = process.env.MONGO_URL || 'mongodb+srv://mongodb+srv://ariachense2755:<db_password>@cluster0.nt0yodu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+';
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => {
+})
+.then(() => {
   console.log('✅ Conectado ao MongoDB Atlas!');
-}).catch((err) => {
+})
+.catch((err) => {
   console.error('❌ Erro ao conectar ao MongoDB', err);
 });
-
-
 
 // Edita produto
 app.put("/api/products/:id", async (req, res) => {
@@ -52,13 +53,13 @@ app.delete("/api/products/:id", async (req, res) => {
   }
 });
 
-// Rotas para Produtos
+// Lista produtos
 app.get('/api/products', async (req, res) => {
   const products = await Product.find();
   res.json(products);
 });
 
-// Rotas para Pedidos
+// Salva pedido
 app.post('/api/orders', async (req, res) => {
   try {
     const order = new Order(req.body);
