@@ -18,8 +18,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexão com MongoDB
-const uri = process.env.MONGO_URL || 'mongodb+srv://mongodb+srv://ariachense2755:<db_password>@cluster0.nt0yodu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-';
+const uri = process.env.MONGO_URL || 'mongodb+srv://user:pass@clusterurl/...';
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
